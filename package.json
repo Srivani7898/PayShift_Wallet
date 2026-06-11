@@ -1,0 +1,35 @@
+{
+  "name": "payswift-wallet",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "axios": "latest",
+    "framer-motion": "^12.40.0",
+    "lucide-react": "latest",
+    "puppeteer": "^25.1.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-qr-code": "^2.2.0",
+    "react-router-dom": "^7.17.0",
+    "recharts": "^2.15.0",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "globals": "latest",
+    "postcss": "latest",
+    "tailwindcss": "^3.4.17"
+  }
+}

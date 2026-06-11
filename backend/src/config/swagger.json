@@ -1,0 +1,342 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PayShift Digital Wallet API",
+    "version": "1.0.0",
+    "description": "Enterprise-grade digital payments wallet API backing PayShift frontend modules"
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Local Sandbox API gateway"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["fullName", "email", "phone", "password"],
+                "properties": {
+                  "fullName": { "type": "string", "example": "John Doe" },
+                  "email": { "type": "string", "format": "email", "example": "john@example.com" },
+                  "phone": { "type": "string", "example": "9876543210" },
+                  "password": { "type": "string", "example": "Password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Request login OTP",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["identifier", "password"],
+                "properties": {
+                  "identifier": { "type": "string", "example": "john@example.com" },
+                  "password": { "type": "string", "example": "Password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP dispatched successfully"
+          }
+        }
+      }
+    },
+    "/auth/verify-otp": {
+      "post": {
+        "summary": "Verify login OTP and generate JWTs",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["otp", "pendingIdentifier"],
+                "properties": {
+                  "otp": { "type": "string", "example": "123456" },
+                  "pendingIdentifier": { "type": "string", "example": "john@example.com" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully logged in"
+          }
+        }
+      }
+    },
+    "/wallet": {
+      "get": {
+        "summary": "Get wallet balance and info",
+        "responses": {
+          "200": {
+            "description": "Wallet data"
+          }
+        }
+      }
+    },
+    "/wallet/add-money": {
+      "post": {
+        "summary": "Top up wallet funds",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": { "type": "number", "example": 2500 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Top-up completed"
+          }
+        }
+      }
+    },
+    "/transactions/send": {
+      "post": {
+        "summary": "Send money to user via email/phone/UPI",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["recipient", "amount", "upiPin"],
+                "properties": {
+                  "recipient": { "type": "string", "example": "friend@example.com" },
+                  "amount": { "type": "number", "example": 500 },
+                  "upiPin": { "type": "string", "example": "4820" },
+                  "description": { "type": "string", "example": "Lunch share" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "P2P transfer succeeded"
+          }
+        }
+      }
+    },
+    "/bank-accounts": {
+      "get": {
+        "summary": "Get all linked bank accounts",
+        "responses": {
+          "200": {
+            "description": "List of bank accounts"
+          }
+        }
+      },
+      "post": {
+        "summary": "Link a new bank account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["bankName", "accountNumber", "ifsc", "accountHolder"],
+                "properties": {
+                  "bankName": { "type": "string", "example": "SBI" },
+                  "accountNumber": { "type": "string", "example": "999888777665" },
+                  "ifsc": { "type": "string", "example": "SBIN0000456" },
+                  "accountHolder": { "type": "string", "example": "John Doe" },
+                  "pin": { "type": "string", "example": "1122" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bank account linked"
+          }
+        }
+      }
+    },
+    "/upi": {
+      "get": {
+        "summary": "Get all active UPI handles",
+        "responses": {
+          "200": {
+            "description": "List of UPI handles"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new UPI handle",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["upiId"],
+                "properties": {
+                  "upiId": { "type": "string", "example": "john@sbi" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "UPI handle created"
+          }
+        }
+      }
+    },
+    "/qr/generate": {
+      "get": {
+        "summary": "Generate payment QR code string",
+        "responses": {
+          "200": {
+            "description": "UPI payment string returned"
+          }
+        }
+      }
+    },
+    "/qr/pay": {
+      "post": {
+        "summary": "Pay scanned QR code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["qrPayload", "amount", "upiPin"],
+                "properties": {
+                  "qrPayload": { "type": "string", "example": "upi://pay?pa=friend@hdfcbank&pn=Friend&cu=INR" },
+                  "amount": { "type": "number", "example": 120 },
+                  "upiPin": { "type": "string", "example": "4820" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QR payment successful"
+          }
+        }
+      }
+    },
+    "/recharges": {
+      "post": {
+        "summary": "Perform mobile/DTH/FASTag recharge",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type", "operator", "amount", "identifier", "upiPin"],
+                "properties": {
+                  "type": { "type": "string", "enum": ["MOBILE", "DTH", "FASTAG"], "example": "MOBILE" },
+                  "operator": { "type": "string", "example": "Jio" },
+                  "amount": { "type": "number", "example": 299 },
+                  "identifier": { "type": "string", "example": "9876543210" },
+                  "circle": { "type": "string", "example": "Maharashtra" },
+                  "upiPin": { "type": "string", "example": "4820" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recharge completed"
+          }
+        }
+      }
+    },
+    "/bills": {
+      "post": {
+        "summary": "Pay utility bill",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["billerName", "billCategory", "consumerNumber", "amount", "upiPin"],
+                "properties": {
+                  "billerName": { "type": "string", "example": "MSEDCL Electricity" },
+                  "billCategory": { "type": "string", "enum": ["Electricity", "Water", "Gas", "Broadband", "Credit Card"], "example": "Electricity" },
+                  "consumerNumber": { "type": "string", "example": "12345678901" },
+                  "amount": { "type": "number", "example": 1420.50 },
+                  "upiPin": { "type": "string", "example": "4820" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bill payment completed"
+          }
+        }
+      }
+    },
+    "/analytics/spending": {
+      "get": {
+        "summary": "Retrieve spending categories aggregate and AI budget recommendations",
+        "responses": {
+          "200": {
+            "description": "Category breakdowns and budget insights list"
+          }
+        }
+      }
+    }
+  }
+}

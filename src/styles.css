@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  @apply bg-white/70 dark:bg-slate-900/75 border border-white/60 dark:border-slate-800/60 backdrop-blur-xl shadow-soft;
+}
+
+.glass-card {
+  @apply bg-white/50 dark:bg-slate-900/50 border border-white/40 dark:border-slate-800/40 backdrop-blur-lg;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-slate-400 dark:hover:bg-slate-600;
+}
+
+/* Background animated sweep */
+.payswift-animated-bg {
+  position: relative;
+  overflow-x: hidden;
+  background:
+    linear-gradient(115deg, rgba(0, 186, 242, 0.12), transparent 34%),
+    linear-gradient(245deg, rgba(0, 41, 112, 0.08), transparent 38%),
+    linear-gradient(135deg, #f0faff 0%, #f4f6ff 42%, #ffffff 100%);
+  background-size: 180% 180%, 190% 190%, 100% 100%;
+  animation: payswift-bg-shift 14s ease-in-out infinite alternate;
+}
+
+.dark .payswift-animated-bg {
+  background:
+    linear-gradient(115deg, rgba(0, 186, 242, 0.08), transparent 34%),
+    linear-gradient(245deg, rgba(0, 208, 132, 0.05), transparent 38%),
+    linear-gradient(135deg, #090f1d 0%, #070d18 42%, #02060f 100%);
+}
+
+.payswift-animated-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(0, 186, 242, 0.1), transparent 34%),
+    radial-gradient(ellipse at 78% 18%, rgba(0, 208, 132, 0.08), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+  filter: saturate(1.1);
+  transform: translate3d(0, 0, 0);
+  animation: payswift-light-sweep 18s ease-in-out infinite alternate;
+}
+
+.dark .payswift-animated-bg::before {
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(0, 186, 242, 0.05), transparent 34%),
+    radial-gradient(ellipse at 78% 18%, rgba(0, 208, 132, 0.04), transparent 36%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+}
+
+@keyframes payswift-bg-shift {
+  0% { background-position: 0% 35%, 100% 50%, center; }
+  100% { background-position: 100% 65%, 0% 45%, center; }
+}
+
+@keyframes payswift-light-sweep {
+  0% { opacity: 0.72; transform: translateY(0); }
+  100% { opacity: 0.95; transform: translateY(-18px); }
+}
+
+/* Auth Scene animations */
+.auth-scene {
+  background:
+    linear-gradient(120deg, rgba(0, 186, 242, 0.15), transparent 34%),
+    linear-gradient(245deg, rgba(0, 208, 132, 0.1), transparent 32%),
+    linear-gradient(135deg, #020914 0%, #04122c 48%, #010610 100%);
+  background-size: 180% 180%, 180% 180%, 100% 100%;
+  animation: auth-bg-shift 13s ease-in-out infinite alternate;
+}
+
+@keyframes auth-bg-shift {
+  0% { background-position: 0% 35%, 100% 55%, center; }
+  100% { background-position: 100% 68%, 0% 40%, center; }
+}
+
+/* Scanner sweep lines */
+.scan-line {
+  animation: scanSweep 2.5s ease-in-out infinite;
+}
+
+@keyframes scanSweep {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(220px);
+    opacity: 1;
+  }
+}
+
+/* Brand logo dynamic ring */
+.payswift-logo-mark {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.payswift-logo-mark::before {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  z-index: -1;
+  background: conic-gradient(from 0deg, rgba(255, 255, 255, 0), rgba(0, 208, 132, 0.8), rgba(255, 255, 255, 0));
+  animation: payswift-logo-ring 3.4s linear infinite;
+}
+
+.payswift-logo-mark::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #00BAF2, #002970 54%, #00D084);
+}
+
+@keyframes payswift-logo-ring {
+  to { transform: rotate(360deg); }
+}
+
+/* Scratch card overlay text select disable */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}

@@ -1,0 +1,179 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  uuid          String          @unique @default(uuid())
+  fullName      String
+  email         String          @unique
+  phone         String          @unique
+  passwordHash  String
+  profileImage  String?
+  isVerified    Boolean         @default(false)
+  isBlocked     Boolean         @default(false)
+  role          String          @default("USER")
+  appLockPin    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  wallet        Wallet?
+  upiIds        UPIId[]
+  bankAccounts  BankAccount[]
+  rewards       Reward[]
+  notifications Notification[]
+  recharges     RechargeHistory[]
+  bills         BillPayment[]
+  kycRecord     KYCRecord?
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  
+  sentTxns      Transaction[]   @relation("SenderTransactions")
+  receivedTxns  Transaction[]   @relation("ReceiverTransactions")
+}
+
+model Wallet {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique
+  balance       Decimal  @default(18450.75)
+  lockedBalance Decimal  @default(0.00)
+  currency      String   @default("INR")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id              Int               @id @default(autoincrement())
+  referenceNumber String            @unique
+  senderId        Int?
+  receiverId      Int?
+  amount          Decimal
+  transactionType String
+  status          String            @default("SUCCESS")
+  description     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  sender          User?             @relation("SenderTransactions", fields: [senderId], references: [id], onDelete: SetNull)
+  receiver        User?             @relation("ReceiverTransactions", fields: [receiverId], references: [id], onDelete: SetNull)
+}
+
+model UPIId {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  upiId      String   @unique
+  isPrimary  Boolean  @default(false)
+  isVerified Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BankAccount {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  bankName      String
+  accountNumber String
+  ifsc          String
+  accountHolder String
+  isPrimary     Boolean  @default(false)
+  pin           String?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bankName])
+}
+
+model Reward {
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  rewardType   String       @default("CASHBACK")
+  rewardAmount Decimal
+  status       String       @default("UNCLAIMED")
+  createdAt    DateTime     @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  message   String
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RechargeHistory {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  mobileNumber    String
+  operator        String
+  circle          String?
+  amount          Decimal
+  status          String   @default("SUCCESS")
+  referenceNumber String   @unique
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BillPayment {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  billerName      String
+  billCategory    String
+  consumerNumber  String
+  amount          Decimal
+  status          String   @default("SUCCESS")
+  referenceNumber String   @unique
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model KYCRecord {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @unique
+  aadhaarNumber String
+  panNumber     String
+  aadhaarUrl    String
+  panUrl        String
+  status        String    @default("PENDING")
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  details   String?
+  userId    Int?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
