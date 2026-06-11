@@ -4,7 +4,7 @@
   "description": "Enterprise-grade TypeScript backend for PayShift payments wallet clone",
   "main": "dist/server.js",
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "tsc",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "prisma:generate": "prisma generate",
