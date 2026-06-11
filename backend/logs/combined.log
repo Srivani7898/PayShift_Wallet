@@ -47,3 +47,4 @@
 {"level":"info","message":"QR transfer success. Sender ID: 4, Receiver ID: 2, Amount: 250","metadata":{},"timestamp":"2026-06-11 13:47:01"}
 {"level":"info","message":"Recharge successful. User: 4, Type: MOBILE, Amount: 299","metadata":{},"timestamp":"2026-06-11 13:47:29"}
 {"level":"info","message":"Bill payment successful. User: 4, Biller: MSEDCL Electricity, Amount: 1420.5","metadata":{},"timestamp":"2026-06-11 13:47:57"}
+{"level":"info","message":"PayShift Backend server running on port 5000 in development mode","metadata":{},"timestamp":"2026-06-11 15:25:35"}
