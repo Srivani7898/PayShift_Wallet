@@ -15,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
 
-    "types": ["node", "express"]
+    "types": ["node"]
   },
 
   "include": ["src/**/*"],
