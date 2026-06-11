@@ -5,6 +5,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        'slate-350': '#b0bcce',
+        'slate-450': '#7c8ba1',
+        'slate-750': '#293548',
+        'slate-850': '#152033',
         brand: {
           50: '#eefcff',
           100: '#d5f4ff',

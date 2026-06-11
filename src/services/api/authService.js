@@ -1,5 +1,6 @@
 import { mockDelay } from '../api.js';
 import { storageService } from '../storage/storage';
+import { upiService } from './upiService';
 
 const createUserFromIdentifier = (identifier = '') => {
   const trimmed = identifier.trim();
@@ -39,7 +40,15 @@ export const authService = {
            u.name?.toLowerCase() === pendingIdentifier.toLowerCase()
     );
     
+    const isNewUser = !matchedUser;
     const user = matchedUser || createUserFromIdentifier(pendingIdentifier);
+    
+    if (isNewUser) {
+      upiService.initializeNewUserBankAccounts();
+      storageService.setKycStatus('Pending');
+      storageService.setWalletBalance(0.00);
+      storageService.setTransactions([]);
+    }
     
     storageService.setToken(token);
     storageService.setUser(user);
@@ -63,6 +72,12 @@ export const authService = {
     
     registered.push(user);
     storageService.set('registered-users', registered);
+    
+    // Initialize clean state for signup
+    upiService.initializeNewUserBankAccounts();
+    storageService.setKycStatus('Pending');
+    storageService.setWalletBalance(0.00);
+    storageService.setTransactions([]);
     
     return { user };
   },

@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/api/authService';
+import { storageService } from '../services/storage/storage';
 import { PageLoader } from '../components/ui/Loader';
 import AppShell from '../components/layout/AppShell';
 
@@ -20,7 +21,24 @@ const AuthFlow = lazy(() => import('../features/auth/AuthFlow'));
 // Guard for protected pages
 function ProtectedRoute({ children }) {
   const isAuth = authService.isAuthenticated();
-  return isAuth ? <AppShell>{children}</AppShell> : <Navigate to="/signup" replace />;
+  const location = useLocation();
+
+  if (!isAuth) {
+    return <Navigate to="/signup" replace />;
+  }
+
+  const kycStatus = storageService.getKycStatus('Pending');
+  const bankAccounts = storageService.getBankAccounts([]);
+  const hasLinkedBank = bankAccounts.some(acc => acc.status === 'Primary' || acc.status === 'Active');
+  const isKycVerified = kycStatus === 'Verified';
+
+  const isSetupPage = ['/dashboard', '/kyc', '/upi', '/profile', '/settings'].includes(location.pathname);
+
+  if ((!isKycVerified || !hasLinkedBank) && !isSetupPage) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <AppShell>{children}</AppShell>;
 }
 
 // Guard for public auth pages

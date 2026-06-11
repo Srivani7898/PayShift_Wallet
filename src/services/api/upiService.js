@@ -213,22 +213,61 @@ export const upiService = {
       storageService.setBankAccounts(initialBankAccounts);
       accounts = initialBankAccounts;
     }
+    
+    const user = storageService.getUser();
+    if (user) {
+      const userName = user.name || 'PayShift User';
+      const userHandle = user.name ? user.name.toLowerCase().replace(/\s+/g, '') : 'user';
+      let hasChanges = false;
+      
+      const fixedAccounts = accounts.map(acc => {
+        if (acc.holder !== userName) {
+          hasChanges = true;
+          const updated = {
+            ...acc,
+            holder: userName
+          };
+          if (updated.upi && updated.upi.includes('srivani@')) {
+            updated.upi = updated.upi.replace('srivani@', `${userHandle}@`);
+          } else if (updated.upi === 'srivani@hdfcbank') {
+            updated.upi = `${userHandle}@hdfcbank`;
+          } else if (updated.upi === 'srivani@sbi') {
+            updated.upi = `${userHandle}@sbi`;
+          } else if (updated.upi === 'srivani@axis') {
+            updated.upi = `${userHandle}@axis`;
+          }
+          return updated;
+        }
+        return acc;
+      });
+      
+      if (hasChanges) {
+        storageService.setBankAccounts(fixedAccounts);
+        accounts = fixedAccounts;
+      }
+    }
+    
     return accounts;
   },
 
   async linkBank(bankName, pin) {
     await mockDelay(true, 750);
     const accounts = await this.getBankAccounts();
+    const hasPrimary = accounts.some(acc => acc.status === 'Primary');
+    const user = storageService.getUser();
+    const userName = user?.name || 'PayShift User';
+    const userHandle = user?.name ? user.name.toLowerCase().replace(/\s+/g, '') : 'user';
     const updated = accounts.map((acc) => {
       if (acc.bank === bankName) {
         return {
           ...acc,
+          holder: userName,
           account: accountNumbers[bankName] || 'XXXX XXXX 6789',
           ifsc: ifscCodes[bankName] || 'BANK0001234',
           branch: 'Verified Branch',
-          upi: `srivani@${bankName.toLowerCase().replace(/\s+bank/g, '').replace(/\s+/g, '')}`,
+          upi: `${userHandle}@${bankName.toLowerCase().replace(/\s+bank/g, '').replace(/\s+/g, '')}`,
           balance: bankBalanceByName[bankName] || '₹12,500.00',
-          status: 'Active',
+          status: hasPrimary ? 'Active' : 'Primary',
           pin: pin || '1234',
         };
       }
@@ -321,6 +360,23 @@ export const upiService = {
     // Basic validation: user@bankname
     const regex = /^[a-zA-Z0-9.\-_]{3,}@[a-zA-Z]{3,}$/;
     return regex.test(upiId);
+  },
+
+  initializeNewUserBankAccounts() {
+    const user = storageService.getUser();
+    const userName = user?.name || 'PayShift User';
+    const unlinked = initialBankAccounts.map(acc => ({
+      ...acc,
+      holder: userName,
+      account: 'Ready to link',
+      ifsc: 'Select branch',
+      branch: 'Popular bank',
+      upi: 'Add UPI ID',
+      balance: 'Not linked',
+      status: 'Available',
+      pin: undefined
+    }));
+    storageService.setBankAccounts(unlinked);
   }
 };
 export default upiService;

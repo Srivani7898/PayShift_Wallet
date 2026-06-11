@@ -187,6 +187,10 @@ export function DashboardPage() {
   ];
 
   const linkedBanks = bankAccounts.filter(b => b.status !== 'Available');
+  const kycStatus = storageService.getKycStatus('Pending');
+  const isKycVerified = kycStatus === 'Verified';
+  const hasLinkedBank = linkedBanks.length > 0;
+  const needsSetup = !isKycVerified || !hasLinkedBank;
 
   if (loading) {
     return (
@@ -222,6 +226,105 @@ export function DashboardPage() {
         </div>
       )}
 
+      {/* ONBOARDING SETUP CHECKLIST */}
+      {needsSetup && (
+        <div className="glass-panel rounded-[28px] border border-brand-500/25 bg-brand-500/5 p-6 shadow-xl relative overflow-hidden">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-brand-500/10 blur-3xl" />
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <span className="flex items-center gap-1.5 text-xs font-black text-brand-700 dark:text-brand-500 uppercase tracking-widest">
+                <Sparkles size={14} /> Action Required
+              </span>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
+                Complete Setup to Activate PayShift Wallet
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-450 font-semibold max-w-2xl leading-relaxed">
+                You are currently in restricted mode. Please complete the following steps to unlock transfers, recharges, bill payments, and withdrawal features.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {/* Step 1: KYC */}
+            <div className={`flex items-start gap-3 rounded-2xl border p-4 transition duration-200 ${
+              isKycVerified 
+                ? 'border-brand-500/20 bg-brand-500/5' 
+                : 'border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40'
+            }`}>
+              <span className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-black shrink-0 ${
+                isKycVerified 
+                  ? 'bg-brand-500 text-white' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-450'
+              }`}>
+                {isKycVerified ? '✓' : '1'}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="text-sm font-black text-slate-800 dark:text-white">
+                    KYC Identity Verification
+                  </h4>
+                  <Badge variant={isKycVerified ? 'success' : 'default'} size="sm">
+                    {kycStatus}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-xs font-bold text-slate-450 dark:text-slate-500 leading-normal">
+                  Verify your Aadhaar or PAN details to enable wallet security audits.
+                </p>
+                {!isKycVerified && (
+                  <Button 
+                    variant="primary" 
+                    size="sm" 
+                    className="mt-3.5 rounded-xl h-8 text-[11px] px-3.5"
+                    onClick={() => navigate('/kyc')}
+                  >
+                    Start Verification
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Step 2: Link Bank Account */}
+            <div className={`flex items-start gap-3 rounded-2xl border p-4 transition duration-200 ${
+              hasLinkedBank 
+                ? 'border-brand-500/20 bg-brand-500/5' 
+                : 'border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40'
+            }`}>
+              <span className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-black shrink-0 ${
+                hasLinkedBank 
+                  ? 'bg-brand-500 text-white' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-450'
+              }`}>
+                {hasLinkedBank ? '✓' : '2'}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="text-sm font-black text-slate-800 dark:text-white">
+                    Link Bank Account
+                  </h4>
+                  <Badge variant={hasLinkedBank ? 'success' : 'default'} size="sm">
+                    {hasLinkedBank ? 'Linked' : 'Not Linked'}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-xs font-bold text-slate-450 dark:text-slate-500 leading-normal">
+                  Connect a savings or salary account via UPI to fund and withdraw money.
+                </p>
+                {!hasLinkedBank && (
+                  <Button 
+                    variant="primary" 
+                    size="sm" 
+                    className="mt-3.5 rounded-xl h-8 text-[11px] px-3.5"
+                    onClick={() => navigate('/upi')}
+                  >
+                    Link Bank Account
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Grid: Balance & Recent transactions */}
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         
@@ -250,6 +353,10 @@ export function DashboardPage() {
               variant="primary"
               className="bg-brand-500 hover:bg-brand-650 text-white rounded-2xl border-none shadow-md shadow-brand-500/20 py-3 text-xs"
               onClick={() => {
+                if (needsSetup) {
+                  showToast('Please complete KYC verification and link a bank account to add money', 'warning');
+                  return;
+                }
                 setFormError('');
                 setIsAddMoneyOpen(true);
               }}
@@ -261,6 +368,10 @@ export function DashboardPage() {
               variant="secondary"
               className="bg-white/10 text-white border-white/10 hover:bg-white/15 rounded-2xl py-3 text-xs"
               onClick={() => {
+                if (needsSetup) {
+                  showToast('Please complete KYC verification and link a bank account to withdraw money', 'warning');
+                  return;
+                }
                 if (linkedBanks.length === 0) {
                   showToast('Please link a bank account to withdraw', 'info');
                   return;
@@ -538,7 +649,7 @@ export function DashboardPage() {
               <button
                 key={val}
                 type="button"
-                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 py-2 text-xs font-black"
+                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 py-2 text-xs font-black text-slate-700 dark:text-slate-200 transition"
                 onClick={() => setAddAmount(String(val))}
               >
                 +₹{val}
